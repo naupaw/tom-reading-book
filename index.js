@@ -28,7 +28,7 @@ const toVideo = (fileId, outname, { replyWithVideo, reply }) => {
     fs.unlink(vid2, () => {});
   };
 
-  const onError = (e) => {
+  const onError = (err) => {
     reply('Unfortunately we broken :( try again later');
     console.log('An error occurred: ' + err.message);
     deleteAll();
