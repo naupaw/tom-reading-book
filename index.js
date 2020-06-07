@@ -108,6 +108,7 @@ const proc = async (fileId, filepath, tele) => {
     out
       .on('finish', () => {
         toVideo(fileId, outname, tele);
+        fs.unlink(filepath, () => {});
       })
       .on('error', () => {
         tele.reply('Unfortunately we broken :( try again later');
@@ -119,8 +120,16 @@ const proc = async (fileId, filepath, tele) => {
 
 const run = () => {
   bot.on('photo', async (ctx) => {
-    const { message, tg, reply, replyWithChatAction } = ctx;
+    const { message, chat, tg, reply, replyWithChatAction } = ctx;
     console.log(JSON.stringify(message, null, 2));
+
+    if (chat.type !== 'private') {
+      if (message.caption && message.caption.match(new RegExp('@t0mas_bot'))) {
+        // contiune...
+      } else {
+        return false;
+      }
+    }
 
     replyWithChatAction('upload_video');
 
