@@ -13,7 +13,7 @@ const assetPath = (filename) => path.resolve(__dirname, 'assets', filename);
 const fileIdPath = (fileId, ext, type = '') =>
   path.resolve(__dirname, 'tmp', `${fileId}${type}.${ext}`);
 
-const toVideo = (fileId, outname, { replyWithVideo, reply }) => {
+const toVideo = (fileId, outname, { replyWithVideo, reply, message }) => {
   const vid1 = assetPath('1.mp4');
   const vid2 = fileIdPath(fileId, 'mp4', '-2');
   const vid3 = assetPath('3.mp4');
@@ -29,7 +29,9 @@ const toVideo = (fileId, outname, { replyWithVideo, reply }) => {
   };
 
   const onError = (err) => {
-    reply('Unfortunately we broken :( try again later');
+    reply('Unfortunately we broken :( try again later', {
+      reply_to_message_id: message.message_id,
+    });
     console.log('An error occurred: ' + err.message);
     deleteAll();
   };
@@ -59,10 +61,15 @@ const toVideo = (fileId, outname, { replyWithVideo, reply }) => {
             .on('end', async () => {
               console.log('[send to telegram]', fileId);
               try {
-                await replyWithVideo({
-                  filename: `${fileId}.mp4`,
-                  source: final,
-                });
+                await replyWithVideo(
+                  {
+                    filename: `${fileId}.mp4`,
+                    source: final,
+                  },
+                  {
+                    reply_to_message_id: message.message_id,
+                  }
+                );
               } catch (e) {}
               deleteAll();
             })
@@ -111,10 +118,14 @@ const proc = async (fileId, filepath, tele) => {
         fs.unlink(filepath, () => {});
       })
       .on('error', () => {
-        tele.reply('Unfortunately we broken :( try again later');
+        tele.reply('Unfortunately we broken :( try again later', {
+          reply_to_message_id: tele.message.message_id,
+        });
       });
   } catch (e) {
-    tele.reply('Unfortunately we broken :( try again later');
+    tele.reply('Unfortunately we broken :( try again later', {
+      reply_to_message_id: tele.message.message_id,
+    });
   }
 };
 
@@ -155,7 +166,9 @@ const run = () => {
     });
 
     request.on('error', (e) => {
-      reply('Unfortunately we broken :( try again later');
+      reply('Unfortunately we broken :( try again later', {
+        reply_to_message_id: message.message_id,
+      });
     });
   });
   console.log('listening...');
